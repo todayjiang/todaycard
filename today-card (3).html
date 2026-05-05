@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>今天先醬｜療癒抽卡</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1410;
+    --paper: #f5f0e8;
+    --gold: #c8a96e;
+    --rose: #d4857a;
+    --sage: #7a9e8e;
+    --mist: #e8e2d8;
+    --shadow: rgba(26,20,16,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background-color: var(--paper);
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(200,169,110,0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 90%, rgba(212,133,122,0.10) 0%, transparent 50%);
+    min-height: 100vh;
+    font-family: 'Noto Serif TC', serif;
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 80px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 50px;
+    animation: fadeDown 1s ease both;
+  }
+
+  .logo-symbol {
+    font-size: 2rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    line-height: 1.2;
+    color: var(--ink);
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--rose);
+  }
+
+  .subtitle {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    letter-spacing: 0.25em;
+    color: var(--sage);
+    text-transform: uppercase;
+  }
+
+  /* Decorative line */
+  .deco-line {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 18px auto;
+    width: fit-content;
+  }
+  .deco-line span { display: block; height: 1px; width: 60px; background: var(--gold); opacity: 0.5; }
+  .deco-line i { color: var(--gold); font-style: normal; font-size: 0.7rem; }
+
+  /* Form card */
+  .form-wrapper {
+    width: 100%;
+    max-width: 480px;
+    animation: fadeUp 1s 0.3s ease both;
+  }
+
+  .form-card {
+    background: rgba(255,255,255,0.55);
+    border: 1px solid rgba(200,169,110,0.3);
+    border-radius: 20px;
+    padding: 40px 36px;
+    backdrop-filter: blur(10px);
+    box-shadow:
+      0 4px 30px var(--shadow),
+      inset 0 1px 0 rgba(255,255,255,0.8);
+  }
+
+  .field {
+    margin-bottom: 24px;
+  }
+
+  label {
+    display: block;
+    font-size: 0.78rem;
+    letter-spacing: 0.2em;
+    color: var(--sage);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  input {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1.5px solid var(--mist);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.7);
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1rem;
+    color: var(--ink);
+    transition: border-color 0.25s, box-shadow 0.25s;
+    outline: none;
+  }
+
+  input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(200,169,110,0.15);
+  }
+
+  input::placeholder { color: #bbb; }
+
+  .draw-btn {
+    width: 100%;
+    padding: 15px;
+    margin-top: 8px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 12px;
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1.05rem;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .draw-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px var(--shadow);
+  }
+
+  .draw-btn:active { transform: translateY(0); }
+
+  .draw-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 40%, rgba(200,169,110,0.2));
+    pointer-events: none;
+  }
+
+  /* Result area */
+  #result-area {
+    width: 100%;
+    max-width: 480px;
+    margin-top: 36px;
+    display: none;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .card-envelope {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 12px 50px rgba(26,20,16,0.18);
+  }
+
+  .card-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(145deg, #2c2520 0%, #1a1410 60%, #251e18 100%);
+  }
+
+  .card-pattern {
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 15% 85%, rgba(200,169,110,0.18) 0%, transparent 40%),
+      radial-gradient(circle at 85% 15%, rgba(212,133,122,0.15) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, rgba(122,158,142,0.08) 0%, transparent 60%);
+  }
+
+  .card-border {
+    position: absolute;
+    inset: 12px;
+    border: 1px solid rgba(200,169,110,0.35);
+    border-radius: 12px;
+    pointer-events: none;
+  }
+
+  .card-content {
+    position: relative;
+    padding: 44px 36px 40px;
+    text-align: center;
+    z-index: 1;
+  }
+
+  .card-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    border: 1px solid rgba(200,169,110,0.4);
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+  }
+
+  .numerology-info {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    margin-bottom: 28px;
+  }
+
+  .num-item {
+    text-align: center;
+  }
+
+  .num-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    color: rgba(200,169,110,0.7);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .num-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .card-divider {
+    width: 60px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(200,169,110,0.5), transparent);
+    margin: 0 auto 24px;
+  }
+
+  .card-emoji {
+    font-size: 2.4rem;
+    margin-bottom: 16px;
+    display: block;
+    filter: drop-shadow(0 0 12px rgba(200,169,110,0.4));
+  }
+
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--gold);
+    font-style: italic;
+    margin-bottom: 18px;
+    letter-spacing: 0.05em;
+  }
+
+  .card-message {
+    font-size: 1rem;
+    line-height: 2;
+    color: rgba(245,240,232,0.88);
+    letter-spacing: 0.05em;
+  }
+
+  .card-footer {
+    margin-top: 28px;
+    font-size: 0.72rem;
+    color: rgba(200,169,110,0.5);
+    letter-spacing: 0.2em;
+  }
+
+  /* Loading state */
+  .loading-dots {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .loading-dots span {
+    width: 6px; height: 6px;
+    background: var(--gold);
+    border-radius: 50%;
+    animation: dot-pulse 1.2s infinite ease-in-out;
+  }
+  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes dot-pulse {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes cardReveal {
+    from { opacity: 0; transform: scale(0.92) rotateX(8deg); }
+    to { opacity: 1; transform: scale(1) rotateX(0); }
+  }
+
+  .card-reveal { animation: cardReveal 0.7s cubic-bezier(0.16,1,0.3,1) both; }
+
+  .error-msg {
+    color: var(--rose);
+    font-size: 0.82rem;
+    margin-top: 10px;
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+
+  .privacy-notice {
+    margin-top: 14px;
+    font-size: 0.72rem;
+    color: #aaa;
+    line-height: 1.7;
+    text-align: center;
+    letter-spacing: 0.03em;
+  }
+
+  .follow-block {
+    width: 100%;
+    max-width: 480px;
+    margin-top: 36px;
+    animation: fadeUp 1s 0.5s ease both;
+  }
+
+  .follow-inner {
+    background: rgba(255,255,255,0.55);
+    border: 1px solid rgba(200,169,110,0.3);
+    border-radius: 20px;
+    padding: 32px 36px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 30px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.8);
+    text-align: center;
+  }
+
+  .follow-symbol {
+    display: block;
+    font-size: 1rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+
+  .follow-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    font-style: italic;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  .follow-subtitle {
+    font-size: 0.82rem;
+    color: #999;
+    letter-spacing: 0.05em;
+    margin-bottom: 20px;
+    line-height: 1.7;
+  }
+
+  .follow-btn {
+    display: inline-block;
+    padding: 12px 28px;
+    background: linear-gradient(135deg, #c8a96e, #b8906a);
+    color: #fff;
+    border-radius: 50px;
+    font-family: 'Noto Serif TC', serif;
+    font-size: 0.92rem;
+    letter-spacing: 0.1em;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 16px rgba(200,169,110,0.35);
+  }
+
+  .follow-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(200,169,110,0.45);
+  }
+
+  footer {
+    margin-top: 60px;
+    text-align: center;
+    font-size: 0.72rem;
+    color: #bbb;
+    letter-spacing: 0.15em;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="logo-symbol">✦ ✦ ✦</span>
+  <h1>今天<em>先醬</em></h1>
+  <p class="subtitle">療癒抽卡 · 生命靈數</p>
+  <div class="deco-line">
+    <span></span><i>❧</i><span></span>
+  </div>
+</header>
+
+<!-- Netlify Forms 隱藏表單（讓 Netlify 偵測到） -->
+<form name="card-submissions" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <input type="text" name="name">
+  <input type="date" name="birthday">
+  <input type="email" name="email">
+  <input type="text" name="life-path">
+  <input type="text" name="year-number">
+  <input type="text" name="card-title">
+  <input type="text" name="blessing">
+  <input type="text" name="submitted-at">
+</form>
+
+<div class="form-wrapper">
+  <div class="form-card">
+    <div class="field">
+      <label>你的名字</label>
+      <input type="text" id="name" placeholder="請輸入你的名字" maxlength="20">
+    </div>
+    <div class="field">
+      <label>出生年月日</label>
+      <input type="date" id="birthday" placeholder="YYYY-MM-DD">
+    </div>
+    <div class="field">
+      <label>Email（祝福寄給你）</label>
+      <input type="email" id="email" placeholder="your@email.com">
+    </div>
+    <button class="draw-btn" onclick="drawCard()">✦ 抽取今日祝福 ✦</button>
+    <div id="error-msg" class="error-msg"></div>
+    <p class="privacy-notice">點擊抽卡即表示您同意本站依據《個人資料保護法》收集您填寫的姓名、出生年月日及 Email，僅用於提供療癒祝福服務，不會轉售或提供予第三方。</p>
+  </div>
+</div>
+
+<div id="result-area">
+  <div class="card-envelope card-reveal" id="card-envelope">
+    <div class="card-bg"></div>
+    <div class="card-pattern"></div>
+    <div class="card-border"></div>
+    <div class="card-content" id="card-content">
+      <!-- filled by JS -->
+    </div>
+  </div>
+</div>
+
+<div class="follow-block">
+  <div class="follow-inner">
+    <span class="follow-symbol">☽ ☆ ☾</span>
+    <p class="follow-title">喜歡今天的祝福嗎？</p>
+    <p class="follow-subtitle">追蹤「今天先醬」，每天一點療癒陪著你</p>
+    <a class="follow-btn" href="https://www.instagram.com/today_jiang?igsh=MXY0Mnh4OWwzZXJ6bQ%3D%3D&utm_source=qr" target="_blank" rel="noopener">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:7px"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+      追蹤 @today_jiang
+    </a>
+  </div>
+</div>
+
+<footer>今天先醬 · 願你帶著這份祝福好好過一天</footer>
+
+<script>
+const CARDS = [
+  { emoji: "🌸", title: "柔軟是你的力量", tone: "溫柔" },
+  { emoji: "🌙", title: "靜下來，答案就在那裡", tone: "靜謐" },
+  { emoji: "☀️", title: "今天是個好日子", tone: "明亮" },
+  { emoji: "🌊", title: "讓情緒流動，不要抓住它", tone: "流動" },
+  { emoji: "🌿", title: "你正在對的路上", tone: "踏實" },
+  { emoji: "✨", title: "相信那些還沒發生的美好", tone: "希望" },
+  { emoji: "🦋", title: "改變不是失去，是蛻變", tone: "轉化" },
+  { emoji: "🕯️", title: "你已經夠好了", tone: "接納" },
+  { emoji: "🌈", title: "雨後才有彩虹", tone: "療癒" },
+];
+
+// 每個靈數有 14 句，搭配今日日期輪替，確保每天不同
+const BLESSINGS = {
+  1: [
+    "你天生就是先行者，今天不需要等任何人的許可，直接出發吧。",
+    "有個想法在你心裡轉了很久，今天是讓它呼吸的好日子。",
+    "你的直覺從來不會說謊，今天就相信第一個感覺。",
+    "領路的人不一定最輕鬆，但你走過的路，會成為別人的光。",
+    "不是每件事都需要解釋，你就是你，這樣就夠了。",
+    "今天遇到的阻礙，其實是在替你篩選值得的事。",
+    "你有能力重新開始，不是因為過去不重要，而是你比過去更大。",
+    "獨自前行有時候是孤獨的，但那份孤獨裡，藏著你最深的力量。",
+    "今天做一件只為自己的事，不解釋，不道歉。",
+    "你不是在跟別人比賽，你在走一條只有你能走的路。",
+    "那個一直說「等準備好再說」的聲音，今天可以先讓它休息了。",
+    "你的勇氣不是不怕，是怕了還是走出去。",
+    "今天允許自己發光，不用擔心太亮會刺到誰。",
+    "你已經比昨天的自己更靠近了，雖然你可能還沒感覺到。",
+  ],
+  2: [
+    "你感受到的，都是真實的。今天不要說服自己「沒關係」。",
+    "今天有人需要你的溫柔，但那個人，首先是你自己。",
+    "你總是能看見別人看不見的細節，這是一種天賦，好好珍惜。",
+    "關係裡的付出不需要完全對等，但你也值得被好好回應。",
+    "今天如果感到疲憊，那是因為你一直都在用心。可以停下來休息。",
+    "你的敏感不是弱點，是你和這個世界之間最深的連結。",
+    "今天有什麼話想說卻沒說嗎？給自己一個機會，說出來。",
+    "你幫了很多人，今天讓別人幫你一次，也沒關係的。",
+    "被需要的感覺很好，但你的價值不只是「有用」。",
+    "今天遇見的每個人，都帶著他們自己的故事。你也是。",
+    "那份你一直壓著的情緒，今天找個安全的地方，讓它出來吧。",
+    "你對別人那麼溫柔，今天也試著對自己說一句好話。",
+    "你不需要修好所有關係，有些距離，是為了讓彼此都好。",
+    "今天有人在靜靜地感謝你，只是你還不知道。",
+  ],
+  3: [
+    "你的笑聲是今天最好的事情之一，讓它多出現幾次。",
+    "有個故事只有你能說，今天找個方式把它表達出來。",
+    "創意不需要等靈感，今天先動手，靈感會追上來的。",
+    "你說話的方式會影響很多人，今天說幾句讓人暖心的話。",
+    "今天允許自己玩一下，不是每件事都需要認真對待。",
+    "你心裡住著一個藝術家，今天給他一點空間出來走走。",
+    "你的幽默是種魔法，今天讓它讓某個人的心情好一點。",
+    "表達是你的天性，今天不要把話吞回去。",
+    "你的想像力比你以為的更有力量，今天讓它帶你去一個地方。",
+    "今天遇到的事，三年後你可能會說：「那時候真的很有趣。」",
+    "你不需要把每個想法都變得完美，先說出來，再慢慢雕塑。",
+    "今天有個人因為你的存在而心情好了一點，你可能沒發現。",
+    "靈感不會在你等待的時候來，今天先開始，它會跟上。",
+    "你的聲音值得佔據空間，今天不要縮小自己。",
+  ],
+  4: [
+    "你蓋的每一塊磚都算數，即使今天看不出整棟房子的樣子。",
+    "穩定是你給世界最大的禮物，今天也謝謝自己一直都在。",
+    "今天不需要做什麼大事，把一件小事做好，就很了不起。",
+    "你對細節的堅持，是別人沒辦法複製的競爭力。",
+    "今天允許自己慢一點，紮實的步伐比衝刺更長久。",
+    "你習慣扛起很多，今天檢查一下，有沒有什麼可以放下。",
+    "計畫趕不上變化，但有計畫的人，面對變化時更從容。",
+    "你的可靠讓很多人安心，今天也讓自己安心一下。",
+    "今天有個小小的進步，雖然不明顯，但它真的發生了。",
+    "你不是完美主義，你只是認真。這兩件事不一樣。",
+    "今天把一直拖著的事做完一件，你會感覺好很多。",
+    "踏實的人走得遠，今天繼續你的步伐，不用急。",
+    "你建造的東西比你以為的更穩固，今天可以信任它。",
+    "今天休息也是一種生產力，讓自己充電，明天繼續。",
+  ],
+  5: [
+    "今天去做一件從來沒做過的事，不管多小都算。",
+    "你的靈魂需要新鮮空氣，今天換條路走走。",
+    "變化不是失去穩定，是你在告訴自己：我還活著。",
+    "今天有個意外的轉折，試著把它當成禮物而不是麻煩。",
+    "自由不是沒有責任，是你選擇了自己想負責的事。",
+    "你比大多數人更不怕改變，今天把這個優勢用出來。",
+    "今天遇到的新事物，可能會成為你下一個熱愛的東西。",
+    "你的好奇心是你最大的資產，今天讓它帶你去某個地方。",
+    "不要把精力花在解釋自己為什麼與眾不同，直接活出來就好。",
+    "今天的你和昨天的你不一樣，這很好，繼續變。",
+    "有時候衝動是對的，今天信任那個想要飛的念頭。",
+    "你習慣在移動中思考，今天讓身體動起來，答案會來的。",
+    "今天遇到的人可能會打開你一扇新的門，保持開放。",
+    "你不怕重新開始，因為你知道每次重來都帶著上次學到的東西。",
+  ],
+  6: [
+    "你付出了很多愛，今天把一點點愛留給自己。",
+    "家不一定是一個地方，今天在你所在的地方，創造一點溫暖。",
+    "你照顧了很多人，今天讓自己被照顧一下，接受它。",
+    "你對「應該」很敏感，今天試著問：我「想要」什麼？",
+    "完美的關係不存在，但真實的連結可以。今天深呼吸一下。",
+    "你的愛是有形的，會出現在每個小細節裡，今天有人感受到了。",
+    "今天允許某件事不完美，你已經做得夠好了。",
+    "你總是想讓身邊的人好，今天也讓自己好。",
+    "有時候最深的愛，是讓對方去走他自己的路。",
+    "今天有個人因為你的存在而感到安心，你可能不知道。",
+    "你的責任感很強，今天把一點點責任交給別人，也沒關係。",
+    "美好的事情不需要理由，今天就是因為你值得。",
+    "你給的溫柔是真實的，今天它也會回到你身上。",
+    "今天做一件讓自己感覺被好好對待的事，你值得這樣對待自己。",
+  ],
+  7: [
+    "不是所有問題都需要今天解答，今天先和問題共處就好。",
+    "你的思考深度是禮物，今天讓它帶你去一個有趣的地方。",
+    "你感覺到的那個「不對勁」，值得被認真對待。",
+    "今天有個答案會悄悄出現，不一定是你在找的那個。",
+    "獨處對你來說是充電，今天給自己一段安靜的時間。",
+    "你不需要把所有事都弄清楚才能繼續走，今天先走一步。",
+    "你的直覺比邏輯更早知道答案，今天試著聽它說話。",
+    "深水才有珍珠，你願意往深處走，這需要勇氣。",
+    "今天讀到或聽到的某句話，會在很久之後才明白它的意思。",
+    "你不是在逃避，你是在消化。給自己時間。",
+    "今天有個靈感會在你放鬆的時候出現，不要逼它。",
+    "你理解事情的方式和別人不同，這讓你看見別人看不見的東西。",
+    "今天允許自己不解釋，有些事只有你自己懂就夠了。",
+    "你正在尋找的答案，其實你已經知道了，今天安靜下來聽聽看。",
+  ],
+  8: [
+    "你比你以為的更有力量，今天讓世界看見真正的你。",
+    "豐盛是你的本質，不是你要努力得到的東西，今天記住這件事。",
+    "你設定的目標不是夢想，是預告，今天往前走一步。",
+    "今天遇到的挑戰，是宇宙在確認你準備好了。",
+    "你對成功的渴望是正當的，不需要為此道歉。",
+    "今天做一個決定，不要再等更多資訊，你已經夠準備好了。",
+    "你的影響力比你感覺到的更大，今天的行動會有漣漪。",
+    "今天把一件拖著的重要事情往前推進，你會感覺到力量回來。",
+    "你知道怎麼把事情做成，今天信任這個能力。",
+    "有時候最強的力量，是知道什麼時候要放手。",
+    "今天你的存在本身就是一種影響力，不需要做什麼特別的事。",
+    "你對自己的要求很高，今天也給自己一點掌聲。",
+    "今天遇到的機會，值得認真考慮，不要太快說不。",
+    "你走過的每一段艱難，都變成了你現在的底氣。",
+  ],
+  9: [
+    "你懂得放下，這是智慧。今天帶著慈悲看待自己的過去。",
+    "你走了很遠的路，今天停下來看看你已經到達的地方。",
+    "今天有個舊的東西可以結束了，讓它好好道別。",
+    "你的同理心是你和世界之間最美的橋，今天讓它發光。",
+    "完成一件事需要勇氣，放下一件事也需要。今天你都做得到。",
+    "你對人性有深刻的理解，今天用這份理解善待自己。",
+    "今天某個循環會結束，結束是為了讓更好的事情有空間進來。",
+    "你給過的愛都不會消失，它們在某個地方繼續流動。",
+    "今天允許自己悲傷，但也允許自己在悲傷裡看見美麗。",
+    "你不需要拯救所有人，今天先把自己照顧好。",
+    "你的靈魂很老，見過很多，今天讓這份老靈魂給你一點智慧。",
+    "今天是個很好的日子來原諒某件事，可以是別人，也可以是自己。",
+    "你知道什麼是真正重要的，今天把精力放在那裡。",
+    "結束和開始往往是同一件事，今天你站在一個很好的位置。",
+  ],
+  11: [
+    "你感受到的那些，比別人更深、更強，今天溫柔地承接它。",
+    "你來這裡是有使命的，不需要急著找到它，它會找到你。",
+    "今天有個直覺很強烈，相信它，不需要邏輯解釋。",
+    "你的敏感讓你看見別人看不見的美，今天讓它成為你的禮物。",
+    "你同時活在很多層次，今天讓自己慢下來，只活在這一刻。",
+    "你有能力照亮別人，但首先要照亮自己。今天從這裡開始。",
+    "今天遇到的某個時刻，會讓你覺得：對，這就是了。",
+    "你不是太多，你剛剛好，只是不是所有人都有能力欣賞。",
+    "今天有個靈感來自很深的地方，記下來，不要讓它消失。",
+    "你的存在本身就是一種影響，今天只需要做自己。",
+    "有時候你感到格格不入，那是因為你本來就是不同頻道的光。",
+    "今天允許自己休息，光也需要充電。",
+    "你比任何人都更能感受到今天的能量，讓它流過你，不要抓住它。",
+    "你正在走一條很少人走過的路，這需要勇氣，你有。",
+  ],
+  22: [
+    "你有能力把夢想變成真實，今天往那個方向多走一步。",
+    "你看見的那個更好的世界，不是幻想，是預見。",
+    "今天把一個大目標拆成一個小行動，然後做那一個小行動。",
+    "你的存在對這個世界有實質的影響，今天繼續做你在做的事。",
+    "你同時擁有夢想家的眼光和建造者的雙手，今天兩個都用上。",
+    "今天遇到的限制，是在邀請你想出更有創意的解法。",
+    "你不是在建造一樣東西，你在建造一個可能性，今天繼續。",
+    "有時候最大的勇氣，是相信自己真的做得到。今天相信。",
+    "你的計畫比別人的更大，所以需要更多耐心，今天繼續撐著。",
+    "今天有個合作或連結的機會，不要錯過它。",
+    "你建造的東西會比你更長壽，今天帶著這份意識去行動。",
+    "今天做一件未來的你會感謝現在的你的事。",
+    "你的使命感是你最強的燃料，今天讓它燒起來。",
+    "你來這裡是要留下什麼的，今天的每一步都在寫那個故事。",
+  ],
+  33: [
+    "你給出去的愛，會以你想不到的方式回到世界上繼續流動。",
+    "今天有人需要聽見一句溫柔的話，你就是那個可以說出口的人。",
+    "你的慈悲是真實的力量，今天讓它帶著你做一件小小的善事。",
+    "今天允許自己感受，不要急著「解決」那個感受。",
+    "你照顧別人的方式很美，今天也用那種方式照顧自己。",
+    "你懂得療癒，因為你也走過需要被療癒的時刻。",
+    "今天有個人會因為你的一句話而覺得好一點，說出來吧。",
+    "愛不是消耗，是流動。今天讓愛透過你流出去，也流回來。",
+    "你的存在讓這個世界溫柔了一點，今天謝謝你還在。",
+    "今天做一件讓自己感到平靜的事，你值得這份安靜。",
+    "你不需要修好所有人，有時候陪著就夠了。",
+    "今天有個美好的時刻會悄悄出現，記得感受它。",
+    "你給的溫暖是真實的，今天它也會回到你身邊。",
+    "你是這個世界的療癒者之一，今天先好好療癒自己。",
+  ],
+};
+
+function pickBlessing(lifePath, dateStr) {
+  // 用今天日期＋生命靈數產生每日不同的索引
+  const today = new Date();
+  const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
+  const key = BLESSINGS[lifePath] ? lifePath : 9;
+  const list = BLESSINGS[key];
+  const idx = (dayOfYear + lifePath) % list.length;
+  return list[idx];
+}
+
+function calcLifePath(dateStr) {
+  const digits = dateStr.replace(/-/g, '').split('').map(Number);
+  let sum = digits.reduce((a, b) => a + b, 0);
+  while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
+    sum = String(sum).split('').map(Number).reduce((a, b) => a + b, 0);
+  }
+  return sum;
+}
+
+function calcYearNumber(dateStr, currentYear) {
+  const [, month, day] = dateStr.split('-');
+  const digits = (String(currentYear) + month + day).split('').map(Number);
+  let sum = digits.reduce((a, b) => a + b, 0);
+  while (sum > 9) {
+    sum = String(sum).split('').map(Number).reduce((a, b) => a + b, 0);
+  }
+  return sum;
+}
+
+function pickCard(lifePath, yearNum) {
+  const idx = (lifePath + yearNum - 2) % CARDS.length;
+  return CARDS[idx];
+}
+
+function pickBlessing(yearNum) {
+  const key = yearNum <= 9 ? yearNum : 9;
+  const list = BLESSINGS[key] || BLESSINGS[9];
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+async function drawCard() {
+  const name = document.getElementById('name').value.trim();
+  const birthday = document.getElementById('birthday').value;
+  const email = document.getElementById('email').value.trim();
+  const errEl = document.getElementById('error-msg');
+
+  errEl.textContent = '';
+
+  if (!name) { errEl.textContent = '請輸入你的名字 🌸'; return; }
+  if (!birthday) { errEl.textContent = '請輸入出生年月日 🗓️'; return; }
+  if (!email || !email.includes('@')) { errEl.textContent = '請輸入有效的 Email 📬'; return; }
+
+  const btn = document.querySelector('.draw-btn');
+  btn.innerHTML = '<span class="loading-dots"><span></span><span></span><span></span></span>';
+  btn.disabled = true;
+
+  const currentYear = new Date().getFullYear();
+  const lifePath = calcLifePath(birthday);
+  const yearNum = calcYearNumber(birthday, currentYear);
+  const card = pickCard(lifePath, yearNum);
+  const blessing = pickBlessing(lifePath, birthday);
+
+  // 送出資料到 Google Sheets
+  try {
+    const submittedAt = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
+    await fetch('https://script.google.com/macros/s/AKfycbyxArol6XUhIOyRP06zevw7exlX2w5O8NAxaVO4om-l4_EdnP5VollvkufBSgL2XoWLOA/exec', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name,
+        birthday: birthday,
+        email: email,
+        lifePath: String(lifePath),
+        yearNumber: String(yearNum),
+        blessing: blessing,
+        submittedAt: submittedAt
+      })
+    });
+  } catch(e) { /* 不影響使用者體驗 */ }
+
+  // Simulate thoughtful pause
+  await new Promise(r => setTimeout(r, 1800));
+
+  const resultArea = document.getElementById('result-area');
+  const cardContent = document.getElementById('card-content');
+  const envelope = document.getElementById('card-envelope');
+
+  const today = new Date().toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  cardContent.innerHTML = `
+    <div class="card-tag">${today} · 為 ${name} 抽取</div>
+    <div class="numerology-info">
+      <div class="num-item">
+        <div class="num-label">生命靈數</div>
+        <div class="num-value">${lifePath}</div>
+      </div>
+      <div class="num-item">
+        <div class="num-label">流年數字</div>
+        <div class="num-value">${yearNum}</div>
+      </div>
+    </div>
+    <div class="card-divider"></div>
+    <span class="card-emoji">${card.emoji}</span>
+    <div class="card-title">${card.title}</div>
+    <div class="card-message">${blessing}</div>
+    <div class="card-footer">✦ 今天先醬，好好過 ✦</div>
+  `;
+
+  resultArea.style.display = 'block';
+  envelope.classList.remove('card-reveal');
+  void envelope.offsetWidth;
+  envelope.classList.add('card-reveal');
+
+  resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  btn.innerHTML = '✦ 再抽一次 ✦';
+  btn.disabled = false;
+}
+</script>
+</body>
+</html>
