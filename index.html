@@ -748,18 +748,18 @@ async function drawCard() {
   // 送出資料到 Google Sheets
   try {
     const submittedAt = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('birthday', birthday);
+    formData.append('email', email);
+    formData.append('lifePath', String(lifePath));
+    formData.append('yearNumber', String(yearNum));
+    formData.append('blessing', blessing);
+    formData.append('submittedAt', submittedAt);
     await fetch('https://script.google.com/macros/s/AKfycbyxArol6XUhIOyRP06zevw7exlX2w5O8NAxaVO4om-l4_EdnP5VollvkufBSgL2XoWLOA/exec', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: name,
-        birthday: birthday,
-        email: email,
-        lifePath: String(lifePath),
-        yearNumber: String(yearNum),
-        blessing: blessing,
-        submittedAt: submittedAt
-      })
+      mode: 'no-cors',
+      body: formData
     });
   } catch(e) { /* 不影響使用者體驗 */ }
 
